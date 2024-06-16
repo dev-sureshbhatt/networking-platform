@@ -2,6 +2,7 @@ import express from "express"
 import dotenv from "dotenv"
 
 import authRouter from './routes/auth.routes.js'
+import userRouter from './routes/user.route.js'
 import connectMongoDB from "./db/connectMongoDB.js"
 import cookieParser from "cookie-parser"
 
@@ -17,6 +18,8 @@ app.use(cookieParser())
 
 
 app.use('/api/auth', authRouter)
+app.use('/api/users', userRouter)
+
 
 
 app.listen(PORT, ()=>{
