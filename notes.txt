@@ -1,0 +1,5 @@
+following array - should include default accounts including the platforms' itself
+default bio
+default cover or maybe image
+
+//need to add joi validation
