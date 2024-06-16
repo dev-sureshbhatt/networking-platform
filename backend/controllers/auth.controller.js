@@ -5,6 +5,7 @@ import bcryptjs from "bcryptjs";
 // Signup Functionality
 export const signup = async (req, res) => {
   try {
+    console.log(req.body.fullName)
     const { fullName, username, email, password } = req.body;
     if (!fullName || !username || !email || !password) {
       console.log("here");
@@ -59,6 +60,7 @@ export const signup = async (req, res) => {
           success: true,
           message: "Signup successful, you can now log in",
           data: {
+            id: newUser._id,
             username: newUser.username,
             fullName: newUser.fullName,
             email: newUser.email,
@@ -80,6 +82,7 @@ export const signup = async (req, res) => {
       });
     }
   } catch (error) {
+    console.log(`Error in signup controller: ${error}`)
     return res.status(500).json({
       success: false,
       message: "Something went wrong on our servers, please try again",
@@ -91,3 +94,97 @@ export const signup = async (req, res) => {
 
 
 //Login Functionality
+
+export const login = async (req,res) => {
+  try {
+    console.log("req")
+    const {email, username, password} = req.body // user should be able to login via both email & username. Currently implementing only one, other in future scope
+    if (username){
+      const existingUser = await User.findOne({username})
+      if (!existingUser){
+        return res.status(401).json({
+          success: false,
+          message: "No user exists"
+        })
+      } else {
+        const isPasswordCorrect = await bcryptjs.compare(password, existingUser.password)
+        if (!isPasswordCorrect){
+          return res.status(401).json({
+            success: false,
+            message: "Invalid credentials"
+          })
+        }
+
+        generateTokenAndSetCookie(existingUser._id, res)
+        return res.status(200).json({
+          success: true,
+          message: "You are now logged in",
+          data: {
+            id: existingUser._id,
+            username: existingUser.username,
+            fullName: existingUser.fullName,
+            email: existingUser.email,
+          }
+        })
+
+
+      }
+
+    }  
+
+    
+  } catch (error) {
+    console.log(`Error in login controller: ${error}`)
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong on our servers, please try again",
+      data: null,
+    });
+  }
+}
+
+
+
+//Logout Controller
+
+export const logout = (req,res) => {
+  try {
+    res.cookie("sessionSecret", "", {maxAge: '0'})
+    res.status(200).json({
+      success: true,
+      message: "Logged out successfully",
+      data: null
+    })  
+  } catch (error) {
+    console.log(`Error in logout controller: ${error}`)
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong on our servers, please try again",
+      data: null,
+    });
+  }
+  
+
+}
+
+
+//Authentication route
+export const getMe = async (req, res) =>{
+  try {
+
+    const validUser = await User.findById(req.user._id).select('-password')
+    res.status(200).json({
+      success: true,
+      message: "Successfully authenticated",
+      data: validUser
+    })
+    
+  } catch (error) {
+    console.log(`Error in authentication route controller: ${error}`)
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong on our servers, please try again",
+      data: null,
+    });
+  }
+}
