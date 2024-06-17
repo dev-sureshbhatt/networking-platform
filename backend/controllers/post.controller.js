@@ -83,10 +83,19 @@ export const createPost = async (req, res) => {
 
 
 export const deletePost = async (req,res) => {
-    const postIdToDelete = req.params.id 
-    const postToDelete = await Post.findById(postIdToDelete)
+    
+
 
     try {
+    const postIdToDelete = req.params.id
+    if (postIdToDelete.length !== 24) {
+        return res.status(400).json({
+            success: false,
+            message: "Please provide a valid post id",
+            data: null
+        })
+    } 
+    const postToDelete = await Post.findById(postIdToDelete)
         if (!postToDelete){
             return res.status(404).json({
                 success: false,
@@ -118,3 +127,54 @@ export const deletePost = async (req,res) => {
     }
 
 } 
+
+
+export const commentOnPost = async (req,res) => {
+    try {
+        const {commentText} = req.body
+        const postId = req.params.id
+        const userId = req.user._id
+
+        if (!commentText){
+            return res.status(400).json({
+                success: false,
+                message: "Comment text is required",
+                data: null
+            })
+        }
+
+        if (commentText.length > 500) {
+            return res.status(400).json({
+                success: false,
+                message: "Maximum 500 characters are allowed in a comment",
+                data: null
+            })
+        }
+
+        const targetPostToComment = await Post.findById(postId)
+        if (!targetPostToComment){
+            return res.status(400).json({
+                success: false,
+                message: "Please comment on a valid post",
+                data: null
+            })
+        }
+
+        const comment = {commentText, commentor: userId}
+        targetPostToComment.comments.push(comment)
+
+        await targetPostToComment.save()
+        return res.status(200).json({
+            success: true,
+            message: "Comment has been posted",
+            data: null
+        })
+    } catch (error) {
+        console.log(`Error in post comment controller: ${error}`)
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            data: null
+        })
+    }
+}
