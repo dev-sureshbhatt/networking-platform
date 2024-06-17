@@ -3,3 +3,5 @@ default bio
 default cover or maybe image
 
 //need to add joi validation
+
+can add memoization to remember latest posts 

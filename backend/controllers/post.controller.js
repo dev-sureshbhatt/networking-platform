@@ -214,7 +214,8 @@ export const likeUnlikePost = async (req,res) => {
         const isLikedAlready =  postToLike.likes.includes(userId) 
         if (isLikedAlready){
             //unlike the post if it is already liked by me
-            await Post.findByIdAndUpdate(postId, {$pull: {likes: userId}}) 
+            await Post.findByIdAndUpdate(postId, {$pull: {likes: userId}})
+            await User.findByIdAndUpdate(userId, {$pull: {likedPosts: postId} }) 
             return res.status(200).json({
                 success: true,
                 message: "Like removed from post",
@@ -224,6 +225,7 @@ export const likeUnlikePost = async (req,res) => {
         } else {
             //else like the postl
             await Post.findByIdAndUpdate(postId, {$push: {likes: userId}} )
+            await User.findByIdAndUpdate(userId, {$push: {likedPosts: postId} })
             const notification = new Notification({
                 from: userId,
                 to: postToLike.postedBy,
@@ -231,6 +233,7 @@ export const likeUnlikePost = async (req,res) => {
 
             })
             await notification.save()
+
             return res.status(200).json({
                 success: true,
                 message: "Post liked",
@@ -258,7 +261,11 @@ export const getAllPosts =  async (req,res) => {
     try {
         const allPosts = await Post.find().sort({createdAt: -1}).populate({
             path: "postedBy",
-            select: '-password'
+            select: ["-password", "-email"]
+        })
+        .populate({
+            path: "comments.commentor",
+            select: ["-password", "-email"]
         })
 
         if (allPosts.length === 0){
@@ -281,4 +288,126 @@ export const getAllPosts =  async (req,res) => {
             data: null
         })
     }
+}
+
+export const getLikedPosts = async (req, res) => {
+    try {
+
+        const userId = req.params.id //user id of which liked posts to fetch
+        const user = await User.findById(userId)
+        if (!user){
+            return res.status(400).json({success: false, message: "No user found", data: null})
+        }
+
+        const likedPost = await Post.find({_id: {$in: user.likedPosts}})
+        .populate({
+            path: 'postedBy',
+            select: '-password'
+        })
+        .populate({
+            path: 'comments.commentor',
+            select: '-password'
+        })
+
+        return res.status(200).json({
+            success: true,
+            message: "Fetched liked for for the target user",
+            data: likedPost
+        })
+        
+    } catch (error) {
+        console.log(`Error in get liked posts controller: ${error}`)
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            data: null
+        })
+    }
+}
+
+export const getFollowingPosts = async (req,res) => {
+ try {
+    const userId = req.user._id
+    const user = await User.findById(userId)
+    if (!user){
+        return res.status(404).json({
+            success: false,
+            message: "No user exists",
+            data: null
+        })
+    }
+
+    const following = user.following
+    const followingFeedPosts = await Post.find({postedBy: {$in: following}}).sort({createdAt: -1}).populate({
+        path:"postedBy",
+        select: ['-password', '-email']
+    })
+    .populate({
+        path: "comments.commentor",
+        select: ['-password', '-email']
+    })
+
+    return res.status(200).json({
+        success: true,
+        message: "Following feed data sent",
+        data: followingFeedPosts
+    })
+
+
+ } catch (error) {
+    console.log(`Error in fetching following posts for feed: ${error}`)
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            data: null
+        })
+    
+ }
+    
+}
+
+
+export const getUserPosts = async (req,res) => {
+    try {
+
+        const username = req.params.username
+    const user = await User.findOne({username})
+    if (!user){
+        return res.status(404).json({
+            success: false,
+            message: "No user exists",
+            data: null
+        })
+    } 
+
+    const postsByUser = await Post.find({postedBy: user._id}).sort({createdAt: -1}).populate({
+        path: "likes",
+        select: ["-email", "-password"]
+    })
+    .populate({
+        path: "comments.commentor",
+        select: ["-email", "-password"]
+    })
+    .populate({
+        path: "postedBy",
+        select: ["-email", "-password"]
+    })
+
+    return res.status(200).json({
+        success: false,
+        message: "Posts by user sent",
+        data: postsByUser
+    })
+        
+    } catch (error) {
+
+        console.log(`Error in fetching posts by user: ${error}`)
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            data: null
+        })
+        
+    }
+    
 }
