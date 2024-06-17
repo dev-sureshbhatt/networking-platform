@@ -220,6 +220,7 @@ export const likeUnlikePost = async (req,res) => {
                 message: "Like removed from post",
                 data: null
             })
+            //need to add another function to delete notification if the post is unliked
         } else {
             //else like the postl
             await Post.findByIdAndUpdate(postId, {$push: {likes: userId}} )
@@ -243,7 +244,30 @@ export const likeUnlikePost = async (req,res) => {
         
     } catch (error) {
 
-        console.log(error)
+        console.log(`Error in Like and Unlike posts controller: ${error}`)
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            data: null
+        })
         
+    }
+}
+
+export const getAllPosts =  async (req,res) => {
+    try {
+        const allPosts = await Post.find().sort({createdAt: -1})
+        return res.status(200).json({
+            success: true,
+            message: "Fetched all latest posts",
+            data: allPosts
+        })
+    } catch (error) {
+        console.log(`Error in get all posts controller: ${error}`)
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            data: null
+        })
     }
 }
