@@ -1,5 +1,6 @@
 import Post from "../models/post.model.js"
 import User from "../models/user.model.js"
+import Notification from "../models/notification.model.js"
 
 import {v2 as cloudinary} from 'cloudinary'
 
@@ -135,6 +136,14 @@ export const commentOnPost = async (req,res) => {
         const postId = req.params.id
         const userId = req.user._id
 
+        if (postId.length !== 24) {
+            return res.status(400).json({
+                success: false,
+                message: "Please provide a valid post id",
+                data: null
+            })
+        } 
+
         if (!commentText){
             return res.status(400).json({
                 success: false,
@@ -176,5 +185,65 @@ export const commentOnPost = async (req,res) => {
             message: "Internal Server Error",
             data: null
         })
+    }
+}
+
+export const likeUnlikePost = async (req,res) => {
+    try {
+        const postId = req.params.id
+        const userId = req.user._id
+
+        if (postId.length !== 24) {
+            return res.status(400).json({
+                success: false,
+                message: "Please provide a valid post id",
+                data: null
+            })
+        } 
+
+        const postToLike = await Post.findById(postId)
+
+        if (!postToLike){
+            return res.status(404).json({
+                success: false,
+                message: "Post not found",
+                data: null
+            })
+        }
+
+        const isLikedAlready =  postToLike.likes.includes(userId) 
+        if (isLikedAlready){
+            //unlike the post if it is already liked by me
+            await Post.findByIdAndUpdate(postId, {$pull: {likes: userId}}) 
+            return res.status(200).json({
+                success: true,
+                message: "Like removed from post",
+                data: null
+            })
+        } else {
+            //else like the postl
+            await Post.findByIdAndUpdate(postId, {$push: {likes: userId}} )
+            const notification = new Notification({
+                from: userId,
+                to: postToLike.postedBy,
+                type: "like"
+
+            })
+            await notification.save()
+            return res.status(200).json({
+                success: true,
+                message: "Post liked",
+                data: null
+            })
+
+        }
+        
+
+
+        
+    } catch (error) {
+
+        console.log(error)
+        
     }
 }
