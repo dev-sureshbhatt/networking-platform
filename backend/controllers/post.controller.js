@@ -1,6 +1,8 @@
 import Post from "../models/post.model.js"
 import User from "../models/user.model.js"
 
+import {v2 as cloudinary} from 'cloudinary'
+
 export const createPost = async (req, res) => {
 
     console.log("inside create  post")
@@ -42,6 +44,13 @@ export const createPost = async (req, res) => {
             })
         }
 
+        
+        if (postImage){
+            const uploadImageResponse = await cloudinary.uploader.upload(postImage)
+            postImage = uploadImageResponse.secure_url
+
+        }
+
        const newPost = new Post({
         postedBy: userId,
         postText,
@@ -71,3 +80,41 @@ export const createPost = async (req, res) => {
         
     }
 }
+
+
+export const deletePost = async (req,res) => {
+    const postIdToDelete = req.params.id 
+    const postToDelete = await Post.findById(postIdToDelete)
+
+    try {
+        if (!postToDelete){
+            return res.status(404).json({
+                success: false,
+                message: "Post doesn't exist or has already been deleted",
+                data: null
+            })
+        }
+        if (postToDelete.postedBy.toString() === req.user._id.toString()){
+            await Post.findByIdAndDelete(postIdToDelete)
+            return res.status(200).json({
+                success: true,
+                message: "Post has been deleted successfully",
+                data: null
+            })
+        } else {
+            return res.status(401).json({
+                success: false,
+                message: "You are not the post owner to delete this post",
+                data: null
+            })
+        }        
+    } catch (error) {
+        console.log(`Error in delete post controller: ${error}`)
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            data: null
+        })
+    }
+
+} 
