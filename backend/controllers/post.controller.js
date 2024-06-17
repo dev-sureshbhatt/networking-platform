@@ -256,7 +256,18 @@ export const likeUnlikePost = async (req,res) => {
 
 export const getAllPosts =  async (req,res) => {
     try {
-        const allPosts = await Post.find().sort({createdAt: -1})
+        const allPosts = await Post.find().sort({createdAt: -1}).populate({
+            path: "postedBy",
+            select: '-password'
+        })
+
+        if (allPosts.length === 0){
+            return res.status(200).json({
+                success: true,
+                message: "No posts available to show",
+                data: null
+            })
+        }
         return res.status(200).json({
             success: true,
             message: "Fetched all latest posts",
