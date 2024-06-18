@@ -8,6 +8,7 @@ import postRouter from './routes/post.route.js'
 import notificationRouter  from './routes/notification.route.js'
 import connectMongoDB from "./db/connectMongoDB.js"
 import cookieParser from "cookie-parser"
+import cors from 'cors'
 
 dotenv.config()
 
@@ -26,6 +27,9 @@ const PORT = process.env.PORT || 5000;
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 app.use(cookieParser())
+app.use(cors({credentials: true ,origin: "http://localhost:5173"}))
+
+
 
 
 app.use('/api/auth', authRouter)
