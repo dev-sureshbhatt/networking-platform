@@ -37,10 +37,10 @@ export const createPost = async (req, res) => {
 
         //need to validate post here for security measures
 
-        if (postText.length > 750){
+        if (postText.length > 2000){
             return res.status(400).json({
                 success: false,
-                message: "Maximum 750 characters are allowed in a post",
+                message: "Maximum 2000 characters are allowed in a post",
                 data: null
             })
         }

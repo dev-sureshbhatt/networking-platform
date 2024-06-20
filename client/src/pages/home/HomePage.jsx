@@ -4,7 +4,7 @@ import Post from "../../components/common/Posts";
 import CreatePost from "./CreatePost";
 
 const HomePage = () => {
-	const [feedType, setFeedType] = useState("forYou");
+	const [feedType, setFeedType] = useState("discover");
 
 	return (
 		<>
@@ -15,10 +15,10 @@ const HomePage = () => {
 						className={
 							"flex justify-center flex-1 p-3 hover:bg-secondary transition duration-300 cursor-pointer relative"
 						}
-						onClick={() => setFeedType("forYou")}
+						onClick={() => setFeedType("discover")}
 					>
 						For you
-						{feedType === "forYou" && (
+						{feedType === "discover" && (
 							<div className='absolute bottom-0 w-10  h-1 rounded-full bg-primary'></div>
 						)}
 					</div>
@@ -37,7 +37,7 @@ const HomePage = () => {
 				<CreatePost />
 
 				{/* POSTS */}
-				<Post />
+				<Post feedType={feedType} />
 			</div>
 		</>
 	);
