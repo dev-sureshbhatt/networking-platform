@@ -116,8 +116,39 @@ export const followUnfollowProfiles = async (req,res) => {
 
 export const getSuggestedUser = async (req,res) => {
 
+    try {
+        
+    } catch (error) {
+        console.log(`Error in getting suggested users: ${error}`)
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            data: null
+        })
+    }
+
     const userId = req.user._id
     const usersFollowedByMe = await User.findById(userId).select("following")
+
+    const users = await User.aggregate([
+        {
+            $match: {
+                _id: { $ne: userId}
+            }
+        },
+        {
+            $sample: {
+                size: 10
+            }
+        }
+])
+
+    // console.log("filtered users are", users)
+    const filteredUsers = users.filter(user => !usersFollowedByMe.following.includes(user._id))
+    const suggestedUsers = filteredUsers.slice(0,4)
+    suggestedUsers.forEach(user => user.password=null)
+    
+    res.status(200).json({success: true, message: "List of suggested users sent", data: suggestedUsers})
 
 }
 
