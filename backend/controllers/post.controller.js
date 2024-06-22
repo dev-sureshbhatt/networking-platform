@@ -216,16 +216,23 @@ export const likeUnlikePost = async (req,res) => {
             //unlike the post if it is already liked by me
             await Post.findByIdAndUpdate(postId, {$pull: {likes: userId}})
             await User.findByIdAndUpdate(userId, {$pull: {likedPosts: postId} }) 
+
+            const updatedLikesOnPost = postToLike.likes.filter( (id) => id.toString() !== userId.toString())
+
             return res.status(200).json({
                 success: true,
                 message: "Like removed from post",
-                data: null
+                data: updatedLikesOnPost
             })
             //need to add another function to delete notification if the post is unliked
         } else {
             //else like the postl
-            await Post.findByIdAndUpdate(postId, {$push: {likes: userId}} )
+            postToLike.likes.push(userId)
             await User.findByIdAndUpdate(userId, {$push: {likedPosts: postId} })
+            await postToLike.save()
+
+            const updatedLikes = postToLike.likes
+            
             const notification = new Notification({
                 from: userId,
                 to: postToLike.postedBy,
@@ -237,7 +244,7 @@ export const likeUnlikePost = async (req,res) => {
             return res.status(200).json({
                 success: true,
                 message: "Post liked",
-                data: null
+                data: updatedLikes
             })
 
         }

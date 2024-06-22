@@ -37,7 +37,7 @@ const Posts = ({feedType}) => {
 						throw new Error(data.message || "Something went wrong")
 					}
 
-					return data
+					return data.data
 				} catch (error) {
 				throw new Error(error)
 				
@@ -66,10 +66,10 @@ const Posts = ({feedType}) => {
 					<PostSkeleton />
 				</div>
 			)}
-			{!isLoading && !isRefetching && fetchedPosts?.data?.length === 0 && <p className='text-center my-4'>No posts in this tab. Switch 👻</p>}
-			{!isLoading && !isRefetching && fetchedPosts?.data && (
+			{!isLoading && !isRefetching && fetchedPosts?.length === 0 && <p className='text-center my-4'>No posts in this tab. Switch 👻</p>}
+			{!isLoading && !isRefetching && fetchedPosts && (
 				<div>
-					{fetchedPosts.data.map((post) => (
+					{fetchedPosts.map((post) => (
 						<Post key={post._id} post={post} />
 					))}
 				</div>

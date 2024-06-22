@@ -16,7 +16,7 @@ const Post = ({ post }) => {
 
 	const queryClient = useQueryClient()
 
-	const {mutate: deletePost, isPending} = useMutation({
+	const {mutate: deletePost, isPending: isDeleting} = useMutation({
 		mutationFn: async () => {
 			try {
 				const res = await fetch(`http://localhost:5000/api/posts/${post._id}`, {
@@ -42,9 +42,59 @@ const Post = ({ post }) => {
 		}
 	})
 
+	const {mutate: likePost, isPending: isLiking} = useMutation({
+		mutationFn: async () => {
+			try {
+
+				const res = await fetch(`http://localhost:5000/api/posts/like/${post._id}`, {
+					method: 'PUT',
+					credentials: 'include'
+				})
+
+				const data = await res.json()
+
+				if (!res.ok || !data.success){
+					throw new Error(data.message || "Something went wrong")
+				}
+
+				return data.data
+				
+			} catch (error) {
+				throw new Error(error.message || "Something went wrong")
+			}
+		},
+		onSuccess: (updatedLikes) => {
+
+			// toast.success("Post liked successfully")
+			//to fetch the number of updated likes, we can invalidate post query but this is not the best way, need to update this in future
+			// queryClient.invalidateQueries({queryKey: ['posts']})
+			//instead of invalidating pposts query, we will update the cache for that liked post
+			
+			// console.log("inside  success block", updatedLikes)
+			queryClient.setQueryData(["posts"], (oldData)=>{
+				return oldData.map((p)=> {
+					if (p._id === post._id){
+						return {...p, likes:updatedLikes}
+					}
+					return p
+				})
+			})
+			
+			// queryClient.setQueryData(['posts'], (oldData)=> {
+			// 	return oldData.map((p) => {
+			// 		if (p._id === post._id){
+			// 			return { ...p, likes: updatedLikes}
+			// 		}
+			// 		return p
+			// 	})
+			// }) 
+
+		}
+	})
+
 
 	const postOwner = post.postedBy; // an object that stores postedBy: {}
-	const isLiked = false;
+	const isLiked = post.likes.includes(authUser.data._id);
 
 	
 	const isMyPost =  authUser.data._id === postOwner._id // to enable elements having editing rights 
@@ -62,7 +112,8 @@ const Post = ({ post }) => {
 	};
 
 	const handleLikePost = () => {
-
+		if  (isLiking) return;
+		likePost()
 	};
 
 	return (
@@ -85,9 +136,9 @@ const Post = ({ post }) => {
 						</span>
 						{isMyPost && (
 							<span className='flex justify-end flex-1'>
-								{!isPending && (<FaTrash className='cursor-pointer hover:text-red-500' onClick={handleDeletePost} />)}
+								{!isDeleting && (<FaTrash className='cursor-pointer hover:text-red-500' onClick={handleDeletePost} />)}
 								{
-									isPending && (<LoadingSpinner size="xs"/>)
+									isDeleting && (<LoadingSpinner size="xs"/>)
 								}
 							</span>
 						)}
@@ -172,10 +223,11 @@ const Post = ({ post }) => {
 								<span className='text-sm text-slate-500 group-hover:text-green-500'>0</span>
 							</div>
 							<div className='flex gap-1 items-center group cursor-pointer' onClick={handleLikePost}>
-								{!isLiked && (
+								{isLiking && <LoadingSpinner  size={"sm"} /> }
+								{!isLiked && !isLiking && (
 									<FaRegHeart className='w-4 h-4 cursor-pointer text-slate-500 group-hover:text-pink-500' />
 								)}
-								{isLiked && <FaRegHeart className='w-4 h-4 cursor-pointer text-pink-500 ' />}
+								{isLiked && !isLiking && <FaRegHeart className='w-4 h-4 cursor-pointer text-pink-500 ' />}
 
 								<span
 									className={`text-sm text-slate-500 group-hover:text-pink-500 ${
