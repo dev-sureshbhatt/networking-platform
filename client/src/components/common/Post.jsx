@@ -11,7 +11,7 @@ import LoadingSpinner from './LoadingSpinner'
 
 const Post = ({ post }) => {
 	// console.log("fetched single post", post) // single post
-	const [comment, setComment] = useState("");
+	const [commentText, setCommentText] = useState("");
 	const {data:authUser} = useQuery({queryKey: ['authUser']})
 
 	const queryClient = useQueryClient()
@@ -92,6 +92,40 @@ const Post = ({ post }) => {
 		}
 	})
 
+	const {mutate: commentPost, isPending: isCommenting} = useMutation({
+		mutationFn: async () => {
+
+			try {
+
+				const res = await fetch(`http://localhost:5000/api/posts/comment/${post._id}`, {
+					method: 'PUT',
+					credentials: "include",
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({commentText})
+				})
+
+				const data = await res.json()
+
+				if (!data.success || !res.ok){
+					throw new Error(data.message || "Something went wrong")
+				}
+
+				return data.data
+				
+			} catch (error) {
+				throw new Error(error.message || "Something went wrong")
+			}
+
+		},
+		onSuccess: () => {
+			toast.success("Comment has been posted")
+			setCommentText("")
+			queryClient.invalidateQueries({queryKey: ['posts']})
+		}
+	})
+
 
 	const postOwner = post.postedBy; // an object that stores postedBy: {}
 	const isLiked = post.likes.includes(authUser.data._id);
@@ -101,7 +135,7 @@ const Post = ({ post }) => {
 
 	const formattedDate = "1h";
 
-	const isCommenting = false;
+	// const isCommenting = false;
 
 	const handleDeletePost = () => {
 		deletePost()
@@ -109,6 +143,7 @@ const Post = ({ post }) => {
 
 	const handlePostComment = (e) => {
 		e.preventDefault();
+		commentPost()
 	};
 
 	const handleLikePost = () => {
@@ -190,7 +225,7 @@ const Post = ({ post }) => {
 															@{comment.commentor.username}
 														</span>
 													</div>
-													<div className='text-sm'>{comment.text}</div>
+													<div className='text-sm'>{comment.commentText}</div>
 												</div>
 											</div>
 										))}
@@ -202,8 +237,8 @@ const Post = ({ post }) => {
 										<textarea
 											className='textarea w-full p-1 rounded text-md resize-none border focus:outline-none  border-gray-800'
 											placeholder='Add a comment...'
-											value={comment}
-											onChange={(e) => setComment(e.target.value)}
+											value={commentText}
+											onChange={(e) => setCommentText(e.target.value)}
 										/>
 										<button className='btn btn-primary rounded-full btn-sm text-white px-4'>
 											{isCommenting ? (
