@@ -8,12 +8,19 @@ import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import LoadingSpinner from './LoadingSpinner'
+import { formatPostDate } from "../../utils/date";
 
 const Post = ({ post }) => {
-	// console.log("fetched single post", post) // single post
-	const [commentText, setCommentText] = useState("");
+
 	const {data:authUser} = useQuery({queryKey: ['authUser']})
 
+
+	const postOwner = post.postedBy; // an object that stores postedBy: {}
+	const isLiked = post.likes.includes(authUser.data._id);	
+	const isMyPost =  authUser.data._id === postOwner._id // to enable elements having editing rights 
+	const formattedDate = formatPostDate(post.createdAt)
+
+	const [commentText, setCommentText] = useState("");
 	const queryClient = useQueryClient()
 
 	const {mutate: deletePost, isPending: isDeleting} = useMutation({
@@ -127,27 +134,18 @@ const Post = ({ post }) => {
 	})
 
 
-	const postOwner = post.postedBy; // an object that stores postedBy: {}
-	const isLiked = post.likes.includes(authUser.data._id);
-
-	
-	const isMyPost =  authUser.data._id === postOwner._id // to enable elements having editing rights 
-
-	const formattedDate = "1h";
-
-	// const isCommenting = false;
-
 	const handleDeletePost = () => {
 		deletePost()
 	};
 
 	const handlePostComment = (e) => {
 		e.preventDefault();
+		if (isCommenting) return;
 		commentPost()
 	};
 
 	const handleLikePost = () => {
-		if  (isLiking) return;
+		if (isLiking) return;
 		likePost()
 	};
 
