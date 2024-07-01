@@ -16,6 +16,7 @@ import { formatMemberSinceDate } from "../../utils/date";
 
 //follow hook
 import useFollow from '../../hooks/useFollow'
+import useUpdateUserProfile from "../../hooks/useUpdateUserProfile";
 
 const ProfilePage = () => {
 	// const {data: authUser, error} = useQuery({queryKey: ['authUser']})
@@ -50,6 +51,8 @@ const ProfilePage = () => {
 
 
 
+	
+
 
 	const [coverImage, setcoverImage] = useState(null);
 	const [profileImage, setprofileImage] = useState(null);
@@ -57,16 +60,11 @@ const ProfilePage = () => {
 
 	const coverImageRef = useRef(null);
 	const profileImageRef = useRef(null);
-
-	
-	// console.log("auth user  inside profile is", authUser.data._id, "and user", user._id)
-
 	const isMyProfile = authUser?.data?._id === user?._id;
-
-
 	const amIFollowing = authUser?.data?.following?.includes(user?._id)
 
-	
+	const {updateProfile, isUpdatingProfile} = useUpdateUserProfile()
+
 
 	const handleImgChange = (e, state) => {
 		const file = e.target.files[0];
@@ -164,9 +162,13 @@ const ProfilePage = () => {
 								{(coverImage || profileImage) && (
 									<button
 										className='btn btn-primary rounded-full btn-sm text-white px-4 ml-2'
-										onClick={() => alert("Profile updated successfully")}
+										onClick={async () => {
+											await updateProfile({coverImage, profileImage})
+											setprofileImage(null)
+											setcoverImage(null)
+										}}
 									>
-										Update
+										{isUpdatingProfile ? "Updating..." : "Update"}
 									</button>
 								)}
 							</div>
