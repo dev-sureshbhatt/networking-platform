@@ -8,7 +8,7 @@ import { useEffect } from "react";
 const host = 'http://localhost:5000'
 
 //using feedType prop to render different feed (discover / following)
-const Posts = ({feedType}) => {
+const Posts = ({feedType, username, userId}) => {
 
 	const getPostEndpoint = () => {
 		switch(feedType){
@@ -16,6 +16,10 @@ const Posts = ({feedType}) => {
 				return `${host}/api/posts/all`;
 			case "following": //feed for posts of people you follow
 				return `${host}/api/posts/following`;
+			case "posts": 
+				return `${host}/api/posts/user/${username}`
+			case "likes":
+				return `${host}/api/posts/likes/${userId}`
 			default: 
 			return `${host}/api/posts/all`;
 

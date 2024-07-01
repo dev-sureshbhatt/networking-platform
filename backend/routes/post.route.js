@@ -5,7 +5,7 @@ import { getAllPosts, getLikedPosts, getFollowingPosts, createPost, deletePost, 
 const router = express.Router()
 
 router.get('/all', authProtect, getAllPosts)
-router.get('/liked/:id', authProtect, getLikedPosts)
+router.get('/likes/:id', authProtect, getLikedPosts)
 router.get('/following', authProtect, getFollowingPosts)
 router.get('/user/:username', authProtect, getUserPosts)
 router.post('/create', authProtect, createPost)

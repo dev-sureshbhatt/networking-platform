@@ -6,7 +6,7 @@ import {v2 as cloudinary} from 'cloudinary'
 
 export const createPost = async (req, res) => {
 
-    console.log("inside create  post")
+    
     try {
 
         const {postText} = req.body
@@ -401,7 +401,7 @@ export const getUserPosts = async (req,res) => {
     })
 
     return res.status(200).json({
-        success: false,
+        success: true,
         message: "Posts by user sent",
         data: postsByUser
     })

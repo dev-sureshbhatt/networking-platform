@@ -4,30 +4,31 @@ import LoadingSpinner from "../../components/common/LoadingSpinner";
 import { IoSettingsOutline } from "react-icons/io5";
 import { FaUser } from "react-icons/fa";
 import { FaHeart } from "react-icons/fa6";
+import {useQuery, useMutation} from '@tanstack/react-query'
 
 const NotificationPage = () => {
-	const isLoading = false;
-	const notifications = [
-		{
-			_id: "1",
-			from: {
-				_id: "1",
-				username: "johndoe",
-				profileImg: "/avatars/boy2.png",
-			},
-			type: "follow",
-		},
-		{
-			_id: "2",
-			from: {
-				_id: "2",
-				username: "janedoe",
-				profileImg: "/avatars/girl1.png",
-			},
-			type: "like",
-		},
-	];
+	// const isLoading = false;
+	const {data:notifications, isLoading} = useQuery({
+		queryKey: ['notifications'],
+		queryFn: async () => {
 
+			try {
+			
+				const res = await fetch('http://localhost:5000/api/notifications', {
+					credentials: 'include'
+				})
+				const data = await res.json()
+				if (!res.ok || !data.success){
+					throw new Error(data.message || "Something went wrong")
+				}
+				return data.data	
+			} catch (error) {
+				throw new Error(error.message || "Something went wrong")
+			}
+
+		}
+	})
+	
 	const deleteNotifications = () => {
 		alert("All notifications deleted");
 	};
@@ -65,11 +66,11 @@ const NotificationPage = () => {
 							<Link to={`/profile/${notification.from.username}`}>
 								<div className='avatar'>
 									<div className='w-8 rounded-full'>
-										<img src={notification.from.profileImg || "/avatar-placeholder.png"} />
+										<img src={notification.from.profileImage || "/avatar-placeholder.png"} />
 									</div>
 								</div>
 								<div className='flex gap-1'>
-									<span className='font-bold'>@{notification.from.username}</span>{" "}
+									<span className='font-bold'>@{notification.from.fullName}</span>{" "}
 									{notification.type === "follow" ? "followed you" : "liked your post"}
 								</div>
 							</Link>
