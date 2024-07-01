@@ -12,7 +12,7 @@ const RightPanel = () => {
 		queryFn: async () => {
 
 			try {
-				const res = await fetch(`http://localhost:5000/api/users/suggested`, {
+				const res = await fetch(`/api/users/suggested`, {
 					credentials: "include"
 				})
 

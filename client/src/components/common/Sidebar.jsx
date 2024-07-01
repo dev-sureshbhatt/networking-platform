@@ -16,7 +16,7 @@ const Sidebar = () => {
 	const {mutate, isPending, isError, error} = useMutation({
 		mutationFn: async () => {
 			try {
-				const res = await fetch('http://localhost:5000/api/auth/logout', {
+				const res = await fetch('/api/auth/logout', {
 					credentials: "include"
 				})
 				

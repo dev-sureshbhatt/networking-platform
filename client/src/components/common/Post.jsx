@@ -26,7 +26,7 @@ const Post = ({ post }) => {
 	const {mutate: deletePost, isPending: isDeleting} = useMutation({
 		mutationFn: async () => {
 			try {
-				const res = await fetch(`http://localhost:5000/api/posts/${post._id}`, {
+				const res = await fetch(`/api/posts/${post._id}`, {
 					method: 'Delete',
 					credentials: 'include'
 				})
@@ -53,7 +53,7 @@ const Post = ({ post }) => {
 		mutationFn: async () => {
 			try {
 
-				const res = await fetch(`http://localhost:5000/api/posts/like/${post._id}`, {
+				const res = await fetch(`/api/posts/like/${post._id}`, {
 					method: 'PUT',
 					credentials: 'include'
 				})
@@ -104,7 +104,7 @@ const Post = ({ post }) => {
 
 			try {
 
-				const res = await fetch(`http://localhost:5000/api/posts/comment/${post._id}`, {
+				const res = await fetch(`/api/posts/comment/${post._id}`, {
 					method: 'PUT',
 					credentials: "include",
 					headers: {

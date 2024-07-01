@@ -17,7 +17,7 @@ const CreatePost = () => {
 		mutationFn: async ({postText, postImage}) => {
 
 			try {
-				const res = await fetch('http://localhost:5000/api/posts/create', {
+				const res = await fetch('/api/posts/create', {
 					method: 'POST',
 					credentials: "include",
 					headers: {

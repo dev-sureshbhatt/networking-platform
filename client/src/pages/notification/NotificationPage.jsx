@@ -14,7 +14,7 @@ const NotificationPage = () => {
 
 			try {
 			
-				const res = await fetch('http://localhost:5000/api/notifications', {
+				const res = await fetch('/api/notifications', {
 					credentials: 'include'
 				})
 				const data = await res.json()

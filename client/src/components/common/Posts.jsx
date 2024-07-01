@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useEffect } from "react";
 
-const host = 'http://localhost:5000'
+// const host = 'http://localhost:5000'
 
 //using feedType prop to render different feed (discover / following)
 const Posts = ({feedType, username, userId}) => {
@@ -13,15 +13,16 @@ const Posts = ({feedType, username, userId}) => {
 	const getPostEndpoint = () => {
 		switch(feedType){
 			case "discover": // feed for discovering new feed
-				return `${host}/api/posts/all`;
+				// return `${host}/api/posts/all`;
+				return `/api/posts/all`
 			case "following": //feed for posts of people you follow
-				return `${host}/api/posts/following`;
+				return `/api/posts/following`;
 			case "posts": 
-				return `${host}/api/posts/user/${username}`
+				return `/api/posts/user/${username}`
 			case "likes":
-				return `${host}/api/posts/likes/${userId}`
+				return `/api/posts/likes/${userId}`
 			default: 
-			return `${host}/api/posts/all`;
+			return `/api/posts/all`;
 
 		}
 	}

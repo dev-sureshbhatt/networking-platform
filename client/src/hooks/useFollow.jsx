@@ -8,7 +8,7 @@ const useFollow = () => {
     mutationFn: async (userId) => {
       try {
         const res = await fetch(
-          `http://localhost:5000/api/users/follow/${userId}`,
+          `/api/users/follow/${userId}`,
           {
             method: "PUT",
             credentials: "include",
