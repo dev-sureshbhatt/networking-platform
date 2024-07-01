@@ -9,7 +9,7 @@ import postRouter from './routes/post.route.js'
 import notificationRouter  from './routes/notification.route.js'
 import connectMongoDB from "./db/connectMongoDB.js"
 import cookieParser from "cookie-parser"
-import cors from 'cors'
+// import cors from 'cors'
 
 dotenv.config()
 
@@ -29,7 +29,7 @@ const __dirname = path.resolve()
 app.use(express.json({limit: '4mb'})) // for image files, we need to still verify if this is secure or not
 app.use(express.urlencoded({extended: true}))
 app.use(cookieParser())
-app.use(cors({credentials: true ,origin: "http://localhost:5173"}))
+// app.use(cors({credentials: true ,origin: "http://localhost:5173"}))
 
 
 
