@@ -16,7 +16,7 @@ function App() {
     queryKey: ['authUser'],
     queryFn: async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/auth/me', {credentials: "include"})
+        const res = await fetch('/api/auth/me', {credentials: "include"})
         const data = await res.json()
 
         
